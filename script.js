@@ -4,6 +4,7 @@ function checkLink(input) {
   let result = document.getElementById("result");
   let log = document.getElementById("fraudLog");
   let resultCard = document.getElementById("result-card");
+  let progressBar = document.getElementById("progress");
 
   let score = 0;
   let reasons = [];
@@ -39,22 +40,56 @@ function checkLink(input) {
     reasons.push("Uses direct IP address instead of domain");
   }
 
+  // Calculate AI-style Risk Percentage
+  let riskPercent = Math.min(score * 25, 100);
+
   // UI Update Logic
   resultCard.classList.remove("hidden");
-  
-  if (score >= 3) {
-    result.innerText = "❌ High Risk Link";
-    result.className = "danger";
-    log.innerHTML = "Reasons:<br>• " + reasons.join("<br>• ");
-  } else if (score >= 1) {
-    result.innerText = "⚠ Medium Risk";
-    result.className = "danger";
-    log.innerHTML = "Warnings:<br>• " + reasons.join("<br>• ");
-  } else {
-    result.innerText = "✅ Safe Link";
+  result.innerText = `Risk Level: ${riskPercent}%`;
+
+  // Update Progress Bar Color & Width
+  progressBar.style.width = riskPercent + "%";
+  if (riskPercent < 30) {
+    progressBar.style.background = "var(--safe)";
     result.className = "safe";
-    log.innerText = "";
+  } else if (riskPercent < 70) {
+    progressBar.style.background = "#fbbf24"; // Orange
+    result.className = "warning";
+  } else {
+    progressBar.style.background = "var(--danger)";
+    result.className = "danger";
   }
+
+  log.innerHTML = reasons.length > 0 
+    ? "<strong>Analysis:</strong><br>• " + reasons.join("<br>• ") 
+    : "No suspicious patterns detected.";
+
+  saveToHistory(input, riskPercent);
+}
+
+function saveToHistory(link, risk) {
+  let history = JSON.parse(localStorage.getItem("qrHistory")) || [];
+  // Keep only last 5 items
+  history.unshift({ link, risk: risk + "%", date: new Date().toLocaleTimeString() });
+  history = history.slice(0, 5);
+  localStorage.setItem("qrHistory", JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  let historyDiv = document.getElementById("history-container");
+  let history = JSON.parse(localStorage.getItem("qrHistory")) || [];
+  
+  if (history.length === 0) return;
+
+  historyDiv.innerHTML = "<h3>📜 Recent Scans</h3>";
+  history.forEach(item => {
+    historyDiv.innerHTML += `
+      <div class="history-item">
+        <span class="history-link">${item.link}</span>
+        <span class="history-risk">${item.risk}</span>
+      </div>`;
+  });
 }
 
 // QR Scanner
@@ -69,3 +104,6 @@ let scanner = new Html5QrcodeScanner("reader", {
 });
 
 scanner.render(onScanSuccess);
+
+// Load history on startup
+renderHistory();
