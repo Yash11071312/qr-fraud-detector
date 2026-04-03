@@ -1,71 +1,57 @@
 function checkLink(input) {
-    let score = 0;
-
-for (let word of suspiciousWords) {
-  if (input.toLowerCase().includes(word)) {
-    score++;
-    log.innerText += "⚠ " + word + " detected\n";
-  }
-}
-
-if (score >= 2) {
-  result.innerText = "❌ High Risk Link";
-  result.className = "danger";
-} else if (score === 1) {
-  result.innerText = "⚠ Medium Risk";
-  result.className = "danger";
-} else {
-  result.innerText = "✅ Safe Link";
-  result.className = "safe";
-}
-    document.getElementById("result-card").classList.remove("hidden");
-  if (!input) return;
+  if (!input || input.trim() === "") return;
 
   let result = document.getElementById("result");
   let log = document.getElementById("fraudLog");
   let resultCard = document.getElementById("result-card");
 
- let suspiciousWords = ["free", "win", "money", "offer", "login", "verify", "bank", "urgent", "click"];
+  let score = 0;
+  let reasons = [];
+  let suspiciousWords = ["free", "win", "money", "offer", "login", "verify", "bank", "urgent", "click", "gift", "account"];
   let suspiciousTLDs = [".xyz", ".top", ".biz", ".tk", ".zip"];
-  
-  let isFraud = false;
-  let reason = "";
-
   const lowerInput = input.toLowerCase();
 
-  // Check for keywords
-  for (let word of suspiciousWords) {
+  // 1. Check for keywords (Multiple keywords increase risk)
+  suspiciousWords.forEach(word => {
     if (lowerInput.includes(word)) {
-      isFraud = true;
-      reason = "⚠ Suspicious keyword detected: " + word;
-      break;
-    }
-  }
-
-  // Check for suspicious TLDs
-  suspiciousTLDs.forEach(tld => {
-    if (lowerInput.endsWith(tld) || lowerInput.includes(tld + "/")) {
-      isFraud = true;
-      reason = "⚠ Uses a high-risk domain extension (" + tld + ")";
+      score++;
+      reasons.push(`Suspicious word: ${word}`);
     }
   });
 
-  // Check for non-HTTPS or IP-based URLs
+  // 2. Check for suspicious TLDs
+  suspiciousTLDs.forEach(tld => {
+    if (lowerInput.endsWith(tld) || lowerInput.includes(tld + "/")) {
+      score += 2;
+      reasons.push(`High-risk domain: ${tld}`);
+    }
+  });
+
+  // 3. Check for non-HTTPS
   if (lowerInput.startsWith("http://")) {
-    isFraud = true;
-    reason = "⚠ Connection is not secure (HTTP)";
-  } else if (/(\d{1,3}\.){3}\d{1,3}/.test(lowerInput)) {
-    isFraud = true;
-    reason = "⚠ Direct IP addresses are often used for phishing";
+    score += 2;
+    reasons.push("Insecure connection (HTTP)");
+  } 
+  
+  // 4. Check for IP-based URLs
+  if (/(\d{1,3}\.){3}\d{1,3}/.test(lowerInput)) {
+    score += 3;
+    reasons.push("Uses direct IP address instead of domain");
   }
 
+  // UI Update Logic
   resultCard.classList.remove("hidden");
-  if (isFraud) {
-    result.innerText = "❌ This link looks suspicious!";
+  
+  if (score >= 3) {
+    result.innerText = "❌ High Risk Link";
     result.className = "danger";
-    log.innerText = reason;
+    log.innerHTML = "Reasons:<br>• " + reasons.join("<br>• ");
+  } else if (score >= 1) {
+    result.innerText = "⚠ Medium Risk";
+    result.className = "danger";
+    log.innerHTML = "Warnings:<br>• " + reasons.join("<br>• ");
   } else {
-    result.innerText = "✅ This link looks safe.";
+    result.innerText = "✅ Safe Link";
     result.className = "safe";
     log.innerText = "";
   }
