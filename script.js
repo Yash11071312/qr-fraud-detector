@@ -1,9 +1,7 @@
-function checkLink() {
-  let input = document.getElementById("qrInput").value;
+function checkLink(input) {
   let result = document.getElementById("result");
   let log = document.getElementById("fraudLog");
 
-  // Basic fraud detection keywords
   let suspiciousWords = ["free", "win", "money", "offer", "click", "login"];
 
   let isFraud = false;
@@ -25,3 +23,16 @@ function checkLink() {
     log.innerText = "";
   }
 }
+
+// QR Scanner
+function onScanSuccess(decodedText) {
+  document.getElementById("qrInput").value = decodedText;
+  checkLink(decodedText);
+}
+
+let scanner = new Html5QrcodeScanner("reader", {
+  fps: 10,
+  qrbox: 250
+});
+
+scanner.render(onScanSuccess);
