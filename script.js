@@ -1,11 +1,31 @@
 function checkLink(input) {
+    let score = 0;
+
+for (let word of suspiciousWords) {
+  if (input.toLowerCase().includes(word)) {
+    score++;
+    log.innerText += "⚠ " + word + " detected\n";
+  }
+}
+
+if (score >= 2) {
+  result.innerText = "❌ High Risk Link";
+  result.className = "danger";
+} else if (score === 1) {
+  result.innerText = "⚠ Medium Risk";
+  result.className = "danger";
+} else {
+  result.innerText = "✅ Safe Link";
+  result.className = "safe";
+}
+    document.getElementById("result-card").classList.remove("hidden");
   if (!input) return;
 
   let result = document.getElementById("result");
   let log = document.getElementById("fraudLog");
   let resultCard = document.getElementById("result-card");
 
-  let suspiciousWords = ["free", "win", "money", "offer", "click", "login", "verify", "account", "gift"];
+ let suspiciousWords = ["free", "win", "money", "offer", "login", "verify", "bank", "urgent", "click"];
   let suspiciousTLDs = [".xyz", ".top", ".biz", ".tk", ".zip"];
   
   let isFraud = false;
