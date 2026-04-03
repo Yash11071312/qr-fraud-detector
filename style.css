@@ -17,7 +17,8 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-y: auto;
+  gap: 3rem; /* Distance between main window and history */
 }
 
 .bg-blobs {
@@ -89,6 +90,14 @@ button:hover {
   transform: translateY(-2px);
 }
 
+.secondary-btn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  padding: 8px 16px;
+}
+
 #result-card {
   margin-top: 1.5rem;
   padding: 1rem;
@@ -121,6 +130,20 @@ button:hover {
   margin-top: 2rem;
   padding: 1.5rem;
   max-width: 450px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.clear-btn {
+  font-size: 0.7rem;
+  padding: 5px 10px;
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid var(--danger);
 }
 
 .history-item {

@@ -78,11 +78,24 @@ function saveToHistory(link, risk) {
 
 function renderHistory() {
   let historyDiv = document.getElementById("history-container");
+  let toggleBtn = document.getElementById("historyToggle");
   let history = JSON.parse(localStorage.getItem("qrHistory")) || [];
   
-  if (history.length === 0) return;
+  if (history.length === 0) {
+    toggleBtn.classList.add("hidden");
+    historyDiv.classList.add("hidden");
+    return;
+  }
 
-  historyDiv.innerHTML = "<h3>📜 Recent Scans</h3>";
+  toggleBtn.classList.remove("hidden");
+
+  historyDiv.innerHTML = `
+    <div class="history-header">
+      <h3>📜 Recent Scans</h3>
+      <button class="clear-btn" onclick="clearHistory()">Clear All</button>
+    </div>
+  `;
+
   history.forEach(item => {
     historyDiv.innerHTML += `
       <div class="history-item">
@@ -90,6 +103,21 @@ function renderHistory() {
         <span class="history-risk">${item.risk}</span>
       </div>`;
   });
+}
+
+function clearHistory() {
+  localStorage.removeItem("qrHistory");
+  renderHistory();
+}
+
+function toggleHistory() {
+  let historyDiv = document.getElementById("history-container");
+  let toggleBtn = document.getElementById("historyToggle");
+  
+  const isHidden = historyDiv.classList.toggle("hidden");
+  toggleBtn.innerText = isHidden ? "Show Recent Scans" : "Hide Recent Scans";
+  
+  if (!isHidden) historyDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
 // QR Scanner
